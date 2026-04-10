@@ -1,0 +1,317 @@
+
++----------------------------------------------------------+
+|                       Pop Enthusiast                       |
++----------------------------------------------------------+
+|  Genre: pop          Mood: happy        Energy: 0.8     |
+|  Affinities: pop (1.0), indie pop (0.7), electronic (0.3)|
+|  acoustic=0.2, dance=0.82, instrumental=False            |
++----------------------------------------------------------+
+
+  #1  Sunrise City -- Neon Echo
+       pop / happy
+       5.99 / 6.0 pts
+       Reasons:
+         + genre match (pop) +2.00
+         + mood match (happy) +1.00
+         + energy proximity +1.50
+         + acousticness fit +0.75
+         + danceability fit +0.50
+         + instrumental fit +0.24
+
+  #2  Rooftop Lights -- Indigo Parade
+       indie pop / happy
+       5.36 / 6.0 pts
+       Reasons:
+         + similar genre (indie pop) +1.40
+         + mood match (happy) +1.00
+         + energy proximity +1.50
+         + acousticness fit +0.73
+         + danceability fit +0.50
+         + instrumental fit +0.23
+
+  #3  Gym Hero -- Max Pulse
+       pop / intense
+       4.95 / 6.0 pts
+       Reasons:
+         + genre match (pop) +2.00
+         + energy proximity +1.47
+         + acousticness fit +0.73
+         + danceability fit +0.50
+         + instrumental fit +0.24
+
+  #4  Neon Bounce -- DJ Chromatic
+       electronic / energetic
+       3.97 / 6.0 pts
+       Reasons:
+         + similar genre (electronic) +0.60
+         + similar mood (energetic) +0.60
+         + energy proximity +1.49
+         + acousticness fit +0.73
+         + danceability fit +0.49
+         + instrumental fit +0.05
+
+  #5  Groove Theory -- Brass Circuit
+       funk / uplifting
+       3.74 / 6.0 pts
+       Reasons:
+         + similar mood (uplifting) +0.80
+         + energy proximity +1.50
+         + acousticness fit +0.75
+         + danceability fit +0.50
+         + instrumental fit +0.20
+
+
+
++----------------------------------------------------------+
+|                      Chill Lofi Coder                      |
++----------------------------------------------------------+
+|  Genre: lofi         Mood: chill        Energy: 0.38    |
+|  Affinities: lofi (1.0), jazz (0.7), ambient (0.6)       |
+|  acoustic=0.8, dance=0.55, instrumental=True             |
++----------------------------------------------------------+
+
+  #1  Library Rain -- Paper Lanterns
+       lofi / chill
+       5.96 / 6.0 pts
+       Reasons:
+         + genre match (lofi) +2.00
+         + mood match (chill) +1.00
+         + energy proximity +1.50
+         + acousticness fit +0.75
+         + danceability fit +0.50
+         + instrumental fit +0.21
+
+  #2  Midnight Coding -- LoRoom
+       lofi / chill
+       5.92 / 6.0 pts
+       Reasons:
+         + genre match (lofi) +2.00
+         + mood match (chill) +1.00
+         + energy proximity +1.50
+         + acousticness fit +0.74
+         + danceability fit +0.50
+         + instrumental fit +0.18
+
+  #3  Focus Flow -- LoRoom
+       lofi / focused
+       5.57 / 6.0 pts
+       Reasons:
+         + genre match (lofi) +2.00
+         + similar mood (focused) +0.60
+         + energy proximity +1.50
+         + acousticness fit +0.75
+         + danceability fit +0.50
+         + instrumental fit +0.22
+
+  #4  Spacewalk Thoughts -- Orbit Bloom
+       ambient / chill
+       5.15 / 6.0 pts
+       Reasons:
+         + similar genre (ambient) +1.20
+         + mood match (chill) +1.00
+         + energy proximity +1.48
+         + acousticness fit +0.74
+         + danceability fit +0.49
+         + instrumental fit +0.24
+
+  #5  Coffee Shop Stories -- Slow Stereo
+       jazz / relaxed
+       5.04 / 6.0 pts
+       Reasons:
+         + similar genre (jazz) +1.40
+         + similar mood (relaxed) +0.80
+         + energy proximity +1.50
+         + acousticness fit +0.74
+         + danceability fit +0.50
+         + instrumental fit +0.10
+
+
+
++----------------------------------------------------------+
+|                      Workout Warrior                       |
++----------------------------------------------------------+
+|  Genre: electronic   Mood: energetic    Energy: 0.9     |
+|  Affinities: electronic (1.0), pop (0.6), metal (0.5)    |
+|  acoustic=0.08, dance=0.9, instrumental=False            |
++----------------------------------------------------------+
+
+  #1  Neon Bounce -- DJ Chromatic
+       electronic / energetic
+       5.80 / 6.0 pts
+       Reasons:
+         + genre match (electronic) +2.00
+         + mood match (energetic) +1.00
+         + energy proximity +1.50
+         + acousticness fit +0.75
+         + danceability fit +0.50
+         + instrumental fit +0.05
+
+  #2  Gym Hero -- Max Pulse
+       pop / intense
+       4.89 / 6.0 pts
+       Reasons:
+         + similar genre (pop) +1.20
+         + similar mood (intense) +0.70
+         + energy proximity +1.50
+         + acousticness fit +0.75
+         + danceability fit +0.50
+         + instrumental fit +0.24
+
+  #3  Sunrise City -- Neon Echo
+       pop / happy
+       4.76 / 6.0 pts
+       Reasons:
+         + similar genre (pop) +1.20
+         + similar mood (happy) +0.60
+         + energy proximity +1.49
+         + acousticness fit +0.74
+         + danceability fit +0.49
+         + instrumental fit +0.24
+
+  #4  Code Red -- Iron Syntax
+       metal / aggressive
+       4.25 / 6.0 pts
+       Reasons:
+         + similar genre (metal) +1.00
+         + similar mood (aggressive) +0.40
+         + energy proximity +1.49
+         + acousticness fit +0.75
+         + danceability fit +0.40
+         + instrumental fit +0.21
+
+  #5  Storm Runner -- Voltline
+       rock / intense
+       3.65 / 6.0 pts
+       Reasons:
+         + similar mood (intense) +0.70
+         + energy proximity +1.50
+         + acousticness fit +0.75
+         + danceability fit +0.47
+         + instrumental fit +0.23
+
+
+
++----------------------------------------------------------+
+|                     Acoustic Campfire                      |
++----------------------------------------------------------+
+|  Genre: folk         Mood: nostalgic    Energy: 0.45    |
+|  Affinities: folk (1.0), jazz (0.6), classical (0.5), indie pop (0.4)|
+|  acoustic=0.9, dance=0.45, instrumental=False            |
++----------------------------------------------------------+
+
+  #1  Golden Hour -- Amber Wave
+       folk / nostalgic
+       5.97 / 6.0 pts
+       Reasons:
+         + genre match (folk) +2.00
+         + mood match (nostalgic) +1.00
+         + energy proximity +1.50
+         + acousticness fit +0.75
+         + danceability fit +0.50
+         + instrumental fit +0.22
+
+  #2  Coffee Shop Stories -- Slow Stereo
+       jazz / relaxed
+       4.49 / 6.0 pts
+       Reasons:
+         + similar genre (jazz) +1.20
+         + similar mood (relaxed) +0.40
+         + energy proximity +1.49
+         + acousticness fit +0.75
+         + danceability fit +0.50
+         + instrumental fit +0.15
+
+  #3  Winter Sonata -- Ivory Keys
+       classical / melancholy
+       4.40 / 6.0 pts
+       Reasons:
+         + similar genre (classical) +1.00
+         + similar mood (melancholy) +0.70
+         + energy proximity +1.47
+         + acousticness fit +0.75
+         + danceability fit +0.48
+         + instrumental fit +0.01
+
+  #4  Velvet Whisper -- Luna Silk
+       r&b / dreamy
+       3.40 / 6.0 pts
+       Reasons:
+         + similar mood (dreamy) +0.60
+         + energy proximity +1.50
+         + acousticness fit +0.60
+         + danceability fit +0.47
+         + instrumental fit +0.24
+
+  #5  Rooftop Lights -- Indigo Parade
+       indie pop / happy
+       3.34 / 6.0 pts
+       Reasons:
+         + similar genre (indie pop) +0.80
+         + energy proximity +1.36
+         + acousticness fit +0.52
+         + danceability fit +0.43
+         + instrumental fit +0.23
+
+
+
++----------------------------------------------------------+
+|                     Late-Night Hip Hop                     |
++----------------------------------------------------------+
+|  Genre: hip hop      Mood: dark         Energy: 0.68    |
+|  Affinities: hip hop (1.0), r&b (0.7), synthwave (0.4)   |
+|  acoustic=0.15, dance=0.75, instrumental=False           |
++----------------------------------------------------------+
+
+  #1  Street Poetry -- Lyric Phoenix
+       hip hop / dark
+       5.99 / 6.0 pts
+       Reasons:
+         + genre match (hip hop) +2.00
+         + mood match (dark) +1.00
+         + energy proximity +1.50
+         + acousticness fit +0.75
+         + danceability fit +0.50
+         + instrumental fit +0.24
+
+  #2  Night Drive Loop -- Neon Echo
+       synthwave / moody
+       4.34 / 6.0 pts
+       Reasons:
+         + similar genre (synthwave) +0.80
+         + similar mood (moody) +0.70
+         + energy proximity +1.49
+         + acousticness fit +0.75
+         + danceability fit +0.50
+         + instrumental fit +0.10
+
+  #3  Velvet Whisper -- Luna Silk
+       r&b / dreamy
+       4.27 / 6.0 pts
+       Reasons:
+         + similar genre (r&b) +1.40
+         + energy proximity +1.45
+         + acousticness fit +0.68
+         + danceability fit +0.50
+         + instrumental fit +0.24
+
+  #4  Code Red -- Iron Syntax
+       metal / aggressive
+       3.29 / 6.0 pts
+       Reasons:
+         + similar mood (aggressive) +0.50
+         + energy proximity +1.38
+         + acousticness fit +0.74
+         + danceability fit +0.46
+         + instrumental fit +0.21
+
+  #5  Storm Runner -- Voltline
+       rock / intense
+       3.19 / 6.0 pts
+       Reasons:
+         + similar mood (intense) +0.30
+         + energy proximity +1.42
+         + acousticness fit +0.75
+         + danceability fit +0.50
+         + instrumental fit +0.23
+
+
