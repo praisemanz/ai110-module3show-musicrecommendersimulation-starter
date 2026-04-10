@@ -20,21 +20,21 @@ MAX_SCORE = Recommender.MAX_SCORE
 
 
 # ---------------------------------------------------------------------------
-# User taste profiles
+# Standard profiles — clear, coherent preferences
 # ---------------------------------------------------------------------------
 
-USER_PROFILES = {
-    "Pop Enthusiast": {
+STANDARD_PROFILES = {
+    "High-Energy Pop": {
         "genre": "pop",
         "mood": "happy",
-        "energy": 0.80,
+        "energy": 0.85,
         "likes_acoustic": False,
         "genre_preferences": {"pop": 1.0, "indie pop": 0.7, "electronic": 0.3},
-        "target_acousticness": 0.20,
-        "target_danceability": 0.82,
+        "target_acousticness": 0.15,
+        "target_danceability": 0.85,
         "prefers_instrumental": False,
     },
-    "Chill Lofi Coder": {
+    "Chill Lofi": {
         "genre": "lofi",
         "mood": "chill",
         "energy": 0.38,
@@ -44,37 +44,73 @@ USER_PROFILES = {
         "target_danceability": 0.55,
         "prefers_instrumental": True,
     },
-    "Workout Warrior": {
-        "genre": "electronic",
-        "mood": "energetic",
-        "energy": 0.90,
+    "Deep Intense Rock": {
+        "genre": "rock",
+        "mood": "intense",
+        "energy": 0.92,
         "likes_acoustic": False,
-        "genre_preferences": {"electronic": 1.0, "pop": 0.6, "metal": 0.5},
-        "target_acousticness": 0.08,
-        "target_danceability": 0.90,
-        "prefers_instrumental": False,
-    },
-    "Acoustic Campfire": {
-        "genre": "folk",
-        "mood": "nostalgic",
-        "energy": 0.45,
-        "likes_acoustic": True,
-        "genre_preferences": {"folk": 1.0, "jazz": 0.6, "classical": 0.5, "indie pop": 0.4},
-        "target_acousticness": 0.90,
-        "target_danceability": 0.45,
-        "prefers_instrumental": False,
-    },
-    "Late-Night Hip Hop": {
-        "genre": "hip hop",
-        "mood": "dark",
-        "energy": 0.68,
-        "likes_acoustic": False,
-        "genre_preferences": {"hip hop": 1.0, "r&b": 0.7, "synthwave": 0.4},
-        "target_acousticness": 0.15,
-        "target_danceability": 0.75,
+        "genre_preferences": {"rock": 1.0, "metal": 0.8, "synthwave": 0.3},
+        "target_acousticness": 0.10,
+        "target_danceability": 0.65,
         "prefers_instrumental": False,
     },
 }
+
+# ---------------------------------------------------------------------------
+# Adversarial / edge-case profiles — designed to stress-test the scoring
+# ---------------------------------------------------------------------------
+
+EDGE_CASE_PROFILES = {
+    "EDGE: High-Energy Sad": {
+        # Conflict: energy 0.95 wants intense bangers, but melancholy mood
+        # wants slow, sad songs. No song in the catalog is both.
+        "genre": "classical",
+        "mood": "melancholy",
+        "energy": 0.95,
+        "likes_acoustic": True,
+        "genre_preferences": {"classical": 1.0, "ambient": 0.5},
+        "target_acousticness": 0.90,
+        "target_danceability": 0.25,
+        "prefers_instrumental": True,
+    },
+    "EDGE: Ghost Genre": {
+        # The genre "reggae" does not exist in the catalog at all.
+        # No song will earn genre points. Tests graceful degradation.
+        "genre": "reggae",
+        "mood": "happy",
+        "energy": 0.70,
+        "likes_acoustic": False,
+        "genre_preferences": {"reggae": 1.0},
+        "target_acousticness": 0.30,
+        "target_danceability": 0.80,
+        "prefers_instrumental": False,
+    },
+    "EDGE: Acoustic Electronic": {
+        # Contradiction: wants electronic genre but high acousticness.
+        # Electronic songs have near-zero acousticness in the dataset.
+        "genre": "electronic",
+        "mood": "dreamy",
+        "energy": 0.50,
+        "likes_acoustic": True,
+        "genre_preferences": {"electronic": 1.0, "ambient": 0.6},
+        "target_acousticness": 0.90,
+        "target_danceability": 0.40,
+        "prefers_instrumental": True,
+    },
+    "EDGE: The Middleground": {
+        # All numeric targets at 0.5, no genre preferences dict.
+        # Tests what happens when the user has zero strong opinions.
+        "genre": "pop",
+        "mood": "chill",
+        "energy": 0.50,
+        "likes_acoustic": False,
+        "target_acousticness": 0.50,
+        "target_danceability": 0.50,
+        "prefers_instrumental": None,
+    },
+}
+
+USER_PROFILES = {**STANDARD_PROFILES, **EDGE_CASE_PROFILES}
 
 
 # ---------------------------------------------------------------------------
@@ -135,10 +171,13 @@ def print_recommendation(rank: int, song: dict, score: float,
 # Main
 # ---------------------------------------------------------------------------
 
-def main() -> None:
-    songs = load_songs(os.path.join(_PROJECT_ROOT, "data", "songs.csv"))
-
-    for profile_name, user_prefs in USER_PROFILES.items():
+def run_profiles(label: str, profiles: dict, songs: list) -> None:
+    """Run a group of profiles and print results."""
+    print()
+    print(f"{'=' * 60}")
+    print(f"  {label}")
+    print(f"{'=' * 60}")
+    for profile_name, user_prefs in profiles.items():
         print()
         print_profile(profile_name, user_prefs)
         print()
@@ -148,7 +187,12 @@ def main() -> None:
         for rank, (song, score, reasons) in enumerate(recommendations, 1):
             print_recommendation(rank, song, score, reasons)
 
-        print()
+
+def main() -> None:
+    songs = load_songs(os.path.join(_PROJECT_ROOT, "data", "songs.csv"))
+
+    run_profiles("STANDARD PROFILES", STANDARD_PROFILES, songs)
+    run_profiles("ADVERSARIAL / EDGE-CASE PROFILES", EDGE_CASE_PROFILES, songs)
 
 
 if __name__ == "__main__":

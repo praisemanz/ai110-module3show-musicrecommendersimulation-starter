@@ -293,146 +293,166 @@ You can add more tests in `tests/test_recommender.py`.
 
 ---
 
-## Experiments You Tried
+## System Evaluation
 
-Use this section to document the experiments you ran. For example:
+We tested the recommender against 3 standard profiles and 4 adversarial edge cases. Each profile ran against all 18 songs and returned the top 5.
 
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+### Standard Profiles
+
+#### 1. High-Energy Pop (`genre=pop, mood=happy, energy=0.85`)
+
+```
+  #1  Sunrise City -- Neon Echo           5.98 / 6.0 pts
+  #2  Rooftop Lights -- Indigo Parade     5.34 / 6.0 pts
+  #3  Gym Hero -- Max Pulse               4.97 / 6.0 pts
+  #4  Neon Bounce -- DJ Chromatic         3.99 / 6.0 pts
+  #5  Groove Theory -- Brass Circuit      3.74 / 6.0 pts
+```
+
+**Intuition check:** Feels right. Sunrise City (pop/happy/0.82 energy) is the obvious best match and scores near-perfect. Rooftop Lights (indie pop/happy) ranks #2 via the genre affinity map — a listener who loves pop would likely enjoy indie pop. Gym Hero is pop but intense, not happy, so it loses the +1.0 mood points and drops to #3. The gap between #3 (4.97) and #4 (3.99) shows the genre cliff working correctly — once we leave the pop family, scores drop by a full point.
+
+**Why Sunrise City ranked #1:**
+- Genre match (pop): +2.00 (exact match — full genre points)
+- Mood match (happy): +1.00 (exact match — full mood points)
+- Energy proximity: +1.50 (|0.82 - 0.85|² = 0.0009, nearly zero penalty)
+- Acousticness fit: +0.75 (|0.18 - 0.15|² = 0.0009)
+- Danceability fit: +0.50 (|0.79 - 0.85|² = 0.0036)
+- Instrumental fit: +0.24 ((1 - 0.05) × 0.25)
+- **Total: 5.98** — only 0.02 away from the theoretical maximum
+
+#### 2. Chill Lofi (`genre=lofi, mood=chill, energy=0.38`)
+
+```
+  #1  Library Rain -- Paper Lanterns      5.96 / 6.0 pts
+  #2  Midnight Coding -- LoRoom           5.92 / 6.0 pts
+  #3  Focus Flow -- LoRoom                5.57 / 6.0 pts
+  #4  Spacewalk Thoughts -- Orbit Bloom   5.15 / 6.0 pts
+  #5  Coffee Shop Stories -- Slow Stereo  5.04 / 6.0 pts
+```
+
+**Intuition check:** All 5 results feel like songs you'd hear on a "study beats" playlist. Library Rain and Midnight Coding are both lofi/chill — the 0.04pt gap comes from Library Rain's acousticness (0.86) being closer to the target (0.80) than Midnight Coding's (0.71). Focus Flow is lofi but "focused" instead of "chill" — the mood similarity map gives it 0.60 partial credit, which is correct (focused and chill are adjacent moods for study sessions). Spacewalk Thoughts (ambient) and Coffee Shop Stories (jazz) both surface via genre affinity — exactly the cross-genre discovery we designed for.
+
+#### 3. Deep Intense Rock (`genre=rock, mood=intense, energy=0.92`)
+
+```
+  #1  Storm Runner -- Voltline            5.97 / 6.0 pts
+  #2  Code Red -- Iron Syntax             5.34 / 6.0 pts
+  #3  Gym Hero -- Max Pulse               3.96 / 6.0 pts
+  #4  Neon Bounce -- DJ Chromatic         3.46 / 6.0 pts
+  #5  Night Drive Loop -- Neon Echo       3.39 / 6.0 pts
+```
+
+**Intuition check:** Storm Runner (rock/intense/0.91 energy) is the perfect match. Code Red (metal/aggressive) ranks #2 because the profile has `metal: 0.8` in genre preferences and the mood similarity map connects aggressive→intense at 0.8. This is musically correct — a rock fan would very likely enjoy metal. The 1.63pt drop from #2 to #3 shows the boundary clearly: after rock and metal, nothing else in the catalog shares the genre family.
+
+### Adversarial / Edge-Case Profiles
+
+#### 4. EDGE: High-Energy Sad (`energy=0.95, mood=melancholy, genre=classical`)
+
+```
+  #1  Winter Sonata -- Ivory Keys         5.35 / 6.0 pts
+  #2  Spacewalk Thoughts -- Orbit Bloom   3.30 / 6.0 pts
+  #3  Golden Hour -- Amber Wave           3.06 / 6.0 pts
+  #4  Night Drive Loop -- Neon Echo       2.98 / 6.0 pts
+  #5  Velvet Whisper -- Luna Silk         2.60 / 6.0 pts
+```
+
+**What this tests:** Can mood and energy be contradictory? Melancholy songs in the catalog have low energy (Winter Sonata 0.30), but the user wants 0.95. No song satisfies both.
+
+**What happened:** Winter Sonata still wins because it matches on genre (classical: +2.00) and mood (melancholy: +1.00), which together total +3.00 — enough to overcome the energy penalty. Its energy proximity score is only +0.87 (instead of the usual ~1.50 for close matches), confirming the penalty is real. But categorical matches outweigh the energy miss because genre (2.0) + mood (1.0) > energy (1.5 max). The system resolves the conflict by prioritizing genre identity over energy fit, which is arguably the right call — a sad classical listener would rather hear the right genre at the wrong tempo than the wrong genre at the right tempo.
+
+**The 2.05pt gap** between #1 (5.35) and #2 (3.30) shows how dependent this profile is on a single song. Remove Winter Sonata from the catalog and the system has nothing good to offer.
+
+#### 5. EDGE: Ghost Genre (`genre=reggae` — not in catalog)
+
+```
+  #1  Rooftop Lights -- Indigo Parade     3.97 / 6.0 pts
+  #2  Sunrise City -- Neon Echo           3.96 / 6.0 pts
+  #3  Groove Theory -- Brass Circuit      3.72 / 6.0 pts
+  #4  Barrio Nights -- Sol Fuego          3.48 / 6.0 pts
+  #5  Neon Bounce -- DJ Chromatic         3.29 / 6.0 pts
+```
+
+**What this tests:** What happens when zero songs match the user's genre? The genre_preferences dict only contains `{"reggae": 1.0}`, so every song scores 0.0 on genre.
+
+**What happened:** The system degrades gracefully. With genre eliminated (0 out of 2.0 for all songs), the maximum possible score drops to 4.0 and mood becomes the primary discriminator. The top 2 songs are both "happy" (exact mood match for +1.00). The scores are compressed into a narrow 3.29–3.97 range because all songs are competing on the same 4.0-point budget. No song dominates, which is the correct behavior — when the system can't serve the user's core preference, it honestly signals that through lower scores rather than faking confidence.
+
+#### 6. EDGE: Acoustic Electronic (`genre=electronic, acousticness=0.90`)
+
+```
+  #1  Spacewalk Thoughts -- Orbit Bloom   4.81 / 6.0 pts
+  #2  Neon Bounce -- DJ Chromatic         4.03 / 6.0 pts
+  #3  Library Rain -- Paper Lanterns      3.61 / 6.0 pts
+  #4  Midnight Coding -- LoRoom           3.57 / 6.0 pts
+  #5  Velvet Whisper -- Luna Silk         3.56 / 6.0 pts
+```
+
+**What this tests:** Electronic music is almost never acoustic. Can the system find a compromise?
+
+**What happened:** Spacewalk Thoughts (ambient) wins — not because of genre match, but because ambient gets 0.6 genre affinity credit (+1.20), plus it has the highest acousticness in the catalog (0.92). Neon Bounce is the only actual electronic song and ranks #2, but its near-zero acousticness (0.04) earns only +0.20 on that component vs. Spacewalk's +0.75. The system chose the song that best balances the contradictory requirements rather than blindly prioritizing genre. This is a defensible trade-off.
+
+#### 7. EDGE: The Middleground (`energy=0.5, acousticness=0.5, danceability=0.5`)
+
+```
+  #1  Sunrise City -- Neon Echo           4.48 / 6.0 pts
+  #2  Gym Hero -- Max Pulse               4.25 / 6.0 pts
+  #3  Midnight Coding -- LoRoom           3.70 / 6.0 pts
+  #4  Library Rain -- Paper Lanterns      3.62 / 6.0 pts
+  #5  Spacewalk Thoughts -- Orbit Bloom   3.54 / 6.0 pts
+```
+
+**What this tests:** A user with no strong opinions — everything at 0.5. Does genre weight dominate?
+
+**What happened:** Yes, genre dominates. Sunrise City and Gym Hero are both pop and rank #1-2 purely because genre match (+2.00) outweighs everything else when all numeric features cluster around 0.5. The system correctly gives pop songs the top spots (genre=pop was set), then falls back to chill mood matches (#3-5). This confirms that with neutral numeric preferences, categorical features drive the ranking — which is by design.
+
+### Diversity Check: Does One Song Dominate?
+
+| Profile | #1 Song | Score |
+|---|---|---|
+| High-Energy Pop | Sunrise City | 5.98 |
+| Chill Lofi | Library Rain | 5.96 |
+| Deep Intense Rock | Storm Runner | 5.97 |
+| EDGE: High-Energy Sad | Winter Sonata | 5.35 |
+| EDGE: Ghost Genre | Rooftop Lights | 3.97 |
+| EDGE: Acoustic Electronic | Spacewalk Thoughts | 4.81 |
+| EDGE: The Middleground | Sunrise City | 4.48 |
+
+**6 unique songs** at #1 across 7 profiles. Sunrise City appears twice (standard pop + middleground) because the Middleground profile has `genre=pop` — it's the system correctly applying genre weight, not a bias. No single song dominates all lists, confirming the weights and dataset provide sufficient variety.
+
+### Weight Shift Experiment
+
+We tested the system's sensitivity by **doubling energy weight** (1.5 to 3.0) and **halving genre weight** (2.0 to 1.0):
+
+| Profile | Original #1 (genre=2.0) | Experimental #1 (genre=1.0) | Changed? |
+|---|---|---|---|
+| High-Energy Pop | Sunrise City (5.98) | Sunrise City (6.48) | No |
+| Chill Lofi | Library Rain (5.96) | Library Rain (6.46) | No |
+| Deep Intense Rock | Storm Runner (5.97) | Storm Runner (6.47) | No |
+| EDGE: The Middleground | **Sunrise City** (4.48) | **Midnight Coding** (5.19) | **Yes** |
+| EDGE: Acoustic Electronic | Spacewalk Thoughts (4.81) | Spacewalk Thoughts (5.64) | No |
+
+**Key finding:** Standard profiles were stable — the #1 song did not change because the best match wins on all features simultaneously. The Middleground profile was the most sensitive: when genre dropped from 2.0 to 1.0, the pop genre anchor was no longer strong enough to beat a lofi song with better energy proximity (0.42 vs 0.50 target = 0.0064 penalty vs 0.82 vs 0.50 = 0.1024 penalty). The experiment confirmed that the original genre=2.0 weight is appropriate for users with clear preferences but over-determines results for users with weak ones.
+
+**Was it more accurate or just different?** For the Middleground profile, the experimental result (Midnight Coding) is arguably more accurate — a user with no strong genre preference and energy target of 0.50 should get a mid-energy song, not a high-energy pop track that happens to match genre. For all other profiles, the original weights produced better results because genre identity matters when the user has a real preference. We reverted to the original weights.
 
 ---
 
 ## Limitations and Risks
 
-Summarize some limitations of your recommender.
+- **Tiny catalog (18 songs):** Some profiles only have 1 exact match. Remove that song and the system has nothing good to offer (e.g., the 2.05pt gap in High-Energy Sad).
+- **Genre cliff:** The +2.0 genre weight creates a hard boundary. A song with 0 genre credit can almost never outscore a genre match, even if every other feature is a better fit.
+- **Middle-energy blind spot:** Only 3 of 18 songs fall in the 0.50--0.74 energy range. Users wanting moderate energy are structurally underserved by the dataset, not the algorithm.
+- **Genre-driven filter bubble:** Lofi and pop have 3 and 2 songs respectively; 13 genres have just 1 song. Lofi/pop users get rich recommendations while classical or folk listeners depend on a single match.
+- **Hand-authored mood map:** If a mood is missing from `MOOD_SIMILARITY`, it gets zero partial credit. New moods need manual entries.
+- **No lyric, language, or cultural understanding:** Two songs can have identical numeric features but completely different lyrical content.
 
-Examples:
-
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
+See [model_card.md](model_card.md) for a deeper analysis.
 
 ---
 
 ## Reflection
 
-Read and complete `model_card.md`:
+[**Model Card**](model_card.md) | [**Profile Comparisons**](reflection.md)
 
-[**Model Card**](model_card.md)
+Recommenders turn data into predictions by reducing songs and users to numbers, then computing similarity. The most important lesson from this project is that **weights are opinions disguised as math.** Setting genre to 2.0 points and mood to 1.0 is not an objective fact — it is a design decision that says "where a song comes from matters more than how it makes you feel." When we halved genre weight in the experiment, the Middleground user suddenly got lofi instead of pop. Neither result is wrong — they reflect different philosophies about what matters in music.
 
-Write 1 to 2 paragraphs here about what you learned:
-
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
-
-
----
-
-## 7. `model_card_template.md`
-
-Combines reflection and model card framing from the Module 3 guidance. :contentReference[oaicite:2]{index=2}  
-
-```markdown
-# 🎧 Model Card - Music Recommender Simulation
-
-## 1. Model Name
-
-Give your recommender a name, for example:
-
-> VibeFinder 1.0
-
----
-
-## 2. Intended Use
-
-- What is this system trying to do
-- Who is it for
-
-Example:
-
-> This model suggests 3 to 5 songs from a small catalog based on a user's preferred genre, mood, and energy level. It is for classroom exploration only, not for real users.
-
----
-
-## 3. How It Works (Short Explanation)
-
-Describe your scoring logic in plain language.
-
-- What features of each song does it consider
-- What information about the user does it use
-- How does it turn those into a number
-
-Try to avoid code in this section, treat it like an explanation to a non programmer.
-
----
-
-## 4. Data
-
-Describe your dataset.
-
-- How many songs are in `data/songs.csv`
-- Did you add or remove any songs
-- What kinds of genres or moods are represented
-- Whose taste does this data mostly reflect
-
----
-
-## 5. Strengths
-
-Where does your recommender work well
-
-You can think about:
-- Situations where the top results "felt right"
-- Particular user profiles it served well
-- Simplicity or transparency benefits
-
----
-
-## 6. Limitations and Bias
-
-Where does your recommender struggle
-
-Some prompts:
-- Does it ignore some genres or moods
-- Does it treat all users as if they have the same taste shape
-- Is it biased toward high energy or one genre by default
-- How could this be unfair if used in a real product
-
----
-
-## 7. Evaluation
-
-How did you check your system
-
-Examples:
-- You tried multiple user profiles and wrote down whether the results matched your expectations
-- You compared your simulation to what a real app like Spotify or YouTube tends to recommend
-- You wrote tests for your scoring logic
-
-You do not need a numeric metric, but if you used one, explain what it measures.
-
----
-
-## 8. Future Work
-
-If you had more time, how would you improve this recommender
-
-Examples:
-
-- Add support for multiple users and "group vibe" recommendations
-- Balance diversity of songs instead of always picking the closest match
-- Use more features, like tempo ranges or lyric themes
-
----
-
-## 9. Personal Reflection
-
-A few sentences about what you learned:
-
-- What surprised you about how your system behaved
-- How did building this change how you think about real music recommenders
-- Where do you think human judgment still matters, even if the model seems "smart"
-
+Bias shows up in two ways. First, **dataset bias**: lofi has 3 songs while classical has 1, so lofi listeners get variety while classical listeners get one match or nothing. A real platform with this imbalance would systematically serve some communities better than others. Second, **algorithmic bias**: the genre weight creates a filter bubble. The Ghost Genre experiment showed that removing genre signal actually produced the most diverse, discovery-oriented results. This suggests that the very feature most responsible for accuracy (genre matching) is also the one most responsible for limiting serendipity. Real platforms face this tension constantly — accuracy and diversity are often at odds.
