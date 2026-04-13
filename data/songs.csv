@@ -1,19 +1,19 @@
-id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness,instrumentalness,speechiness
-1,Sunrise City,Neon Echo,pop,happy,0.82,118,0.84,0.79,0.18,0.05,0.12
-2,Midnight Coding,LoRoom,lofi,chill,0.42,78,0.56,0.62,0.71,0.72,0.05
-3,Storm Runner,Voltline,rock,intense,0.91,152,0.48,0.66,0.10,0.10,0.08
-4,Library Rain,Paper Lanterns,lofi,chill,0.35,72,0.60,0.58,0.86,0.85,0.03
-5,Gym Hero,Max Pulse,pop,intense,0.93,132,0.77,0.88,0.05,0.03,0.15
-6,Spacewalk Thoughts,Orbit Bloom,ambient,chill,0.28,60,0.65,0.41,0.92,0.95,0.02
-7,Coffee Shop Stories,Slow Stereo,jazz,relaxed,0.37,90,0.71,0.54,0.89,0.40,0.18
-8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22,0.60,0.07
-9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78,0.88,0.04
-10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35,0.08,0.10
-11,Barrio Nights,Sol Fuego,latin,romantic,0.72,104,0.78,0.85,0.30,0.06,0.14
-12,Code Red,Iron Syntax,metal,aggressive,0.96,168,0.32,0.45,0.03,0.15,0.22
-13,Golden Hour,Amber Wave,folk,nostalgic,0.44,88,0.73,0.50,0.94,0.12,0.09
-14,Neon Bounce,DJ Chromatic,electronic,energetic,0.89,140,0.70,0.92,0.04,0.78,0.06
-15,Velvet Whisper,Luna Silk,r&b,dreamy,0.50,92,0.68,0.70,0.45,0.04,0.20
-16,Groove Theory,Brass Circuit,funk,uplifting,0.83,116,0.86,0.90,0.28,0.20,0.11
-17,Winter Sonata,Ivory Keys,classical,melancholy,0.30,66,0.35,0.25,0.97,0.96,0.01
-18,Street Poetry,Lyric Phoenix,hip hop,dark,0.70,96,0.42,0.76,0.12,0.02,0.85
+id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness,instrumentalness,speechiness,popularity,release_decade,mood_tags,liveness,vocal_gender
+1,Sunrise City,Neon Echo,pop,happy,0.82,118,0.84,0.79,0.18,0.05,0.12,85,2020s,euphoric;anthemic,0.12,mixed
+2,Midnight Coding,LoRoom,lofi,chill,0.42,78,0.56,0.62,0.71,0.72,0.05,62,2020s,atmospheric;introspective,0.08,none
+3,Storm Runner,Voltline,rock,intense,0.91,152,0.48,0.66,0.10,0.10,0.08,71,2010s,aggressive;powerful,0.35,male
+4,Library Rain,Paper Lanterns,lofi,chill,0.35,72,0.60,0.58,0.86,0.85,0.03,48,2020s,atmospheric;soothing,0.05,none
+5,Gym Hero,Max Pulse,pop,intense,0.93,132,0.77,0.88,0.05,0.03,0.15,92,2020s,anthemic;powerful,0.18,male
+6,Spacewalk Thoughts,Orbit Bloom,ambient,chill,0.28,60,0.65,0.41,0.92,0.95,0.02,34,2010s,atmospheric;ethereal,0.04,none
+7,Coffee Shop Stories,Slow Stereo,jazz,relaxed,0.37,90,0.71,0.54,0.89,0.40,0.18,41,2000s,warm;intimate,0.22,female
+8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22,0.60,0.07,67,2010s,cinematic;brooding,0.10,none
+9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78,0.88,0.04,58,2020s,atmospheric;minimal,0.06,none
+10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35,0.08,0.10,73,2020s,euphoric;warm,0.15,female
+11,Barrio Nights,Sol Fuego,latin,romantic,0.72,104,0.78,0.85,0.30,0.06,0.14,78,2020s,sensual;warm,0.20,male
+12,Code Red,Iron Syntax,metal,aggressive,0.96,168,0.32,0.45,0.03,0.15,0.22,55,2010s,aggressive;chaotic,0.45,male
+13,Golden Hour,Amber Wave,folk,nostalgic,0.44,88,0.73,0.50,0.94,0.12,0.09,39,2000s,warm;bittersweet,0.30,female
+14,Neon Bounce,DJ Chromatic,electronic,energetic,0.89,140,0.70,0.92,0.04,0.78,0.06,88,2020s,euphoric;anthemic,0.08,none
+15,Velvet Whisper,Luna Silk,r&b,dreamy,0.50,92,0.68,0.70,0.45,0.04,0.20,64,2020s,sensual;ethereal,0.12,female
+16,Groove Theory,Brass Circuit,funk,uplifting,0.83,116,0.86,0.90,0.28,0.20,0.11,70,1990s,warm;anthemic,0.38,male
+17,Winter Sonata,Ivory Keys,classical,melancholy,0.30,66,0.35,0.25,0.97,0.96,0.01,28,1990s,bittersweet;ethereal,0.05,none
+18,Street Poetry,Lyric Phoenix,hip hop,dark,0.70,96,0.42,0.76,0.12,0.02,0.85,76,2020s,brooding;introspective,0.15,male

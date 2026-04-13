@@ -1,26 +1,18 @@
 """
 Command line runner for the Music Recommender Simulation.
-
-This file helps you quickly run and test your recommender.
-
-You will implement the functions in recommender.py:
-- load_songs
-- score_song
-- recommend_songs
+Demonstrates all four challenges: advanced features, scoring modes,
+diversity penalty, and visual summary tables.
 """
 
 import os
 
-from recommender import load_songs, recommend_songs, Recommender
+from recommender import load_songs, recommend_songs, Recommender, SCORING_MODES
 
-# Resolve paths relative to the project root (one level above src/)
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-MAX_SCORE = Recommender.MAX_SCORE
 
 
 # ---------------------------------------------------------------------------
-# Standard profiles — clear, coherent preferences
+# User taste profiles (using all new features)
 # ---------------------------------------------------------------------------
 
 STANDARD_PROFILES = {
@@ -33,6 +25,11 @@ STANDARD_PROFILES = {
         "target_acousticness": 0.15,
         "target_danceability": 0.85,
         "prefers_instrumental": False,
+        "min_popularity": 60,
+        "preferred_decade": "2020s",
+        "preferred_mood_tags": ["euphoric", "anthemic"],
+        "target_liveness": 0.15,
+        "preferred_vocal": "mixed",
     },
     "Chill Lofi": {
         "genre": "lofi",
@@ -43,6 +40,11 @@ STANDARD_PROFILES = {
         "target_acousticness": 0.80,
         "target_danceability": 0.55,
         "prefers_instrumental": True,
+        "min_popularity": 30,
+        "preferred_decade": "2020s",
+        "preferred_mood_tags": ["atmospheric", "soothing", "minimal"],
+        "target_liveness": 0.05,
+        "preferred_vocal": "none",
     },
     "Deep Intense Rock": {
         "genre": "rock",
@@ -53,17 +55,16 @@ STANDARD_PROFILES = {
         "target_acousticness": 0.10,
         "target_danceability": 0.65,
         "prefers_instrumental": False,
+        "min_popularity": 50,
+        "preferred_decade": "2010s",
+        "preferred_mood_tags": ["aggressive", "powerful"],
+        "target_liveness": 0.35,
+        "preferred_vocal": "male",
     },
 }
 
-# ---------------------------------------------------------------------------
-# Adversarial / edge-case profiles — designed to stress-test the scoring
-# ---------------------------------------------------------------------------
-
 EDGE_CASE_PROFILES = {
     "EDGE: High-Energy Sad": {
-        # Conflict: energy 0.95 wants intense bangers, but melancholy mood
-        # wants slow, sad songs. No song in the catalog is both.
         "genre": "classical",
         "mood": "melancholy",
         "energy": 0.95,
@@ -72,10 +73,13 @@ EDGE_CASE_PROFILES = {
         "target_acousticness": 0.90,
         "target_danceability": 0.25,
         "prefers_instrumental": True,
+        "min_popularity": 20,
+        "preferred_decade": "1990s",
+        "preferred_mood_tags": ["bittersweet", "ethereal"],
+        "target_liveness": 0.05,
+        "preferred_vocal": "none",
     },
     "EDGE: Ghost Genre": {
-        # The genre "reggae" does not exist in the catalog at all.
-        # No song will earn genre points. Tests graceful degradation.
         "genre": "reggae",
         "mood": "happy",
         "energy": 0.70,
@@ -84,29 +88,11 @@ EDGE_CASE_PROFILES = {
         "target_acousticness": 0.30,
         "target_danceability": 0.80,
         "prefers_instrumental": False,
-    },
-    "EDGE: Acoustic Electronic": {
-        # Contradiction: wants electronic genre but high acousticness.
-        # Electronic songs have near-zero acousticness in the dataset.
-        "genre": "electronic",
-        "mood": "dreamy",
-        "energy": 0.50,
-        "likes_acoustic": True,
-        "genre_preferences": {"electronic": 1.0, "ambient": 0.6},
-        "target_acousticness": 0.90,
-        "target_danceability": 0.40,
-        "prefers_instrumental": True,
-    },
-    "EDGE: The Middleground": {
-        # All numeric targets at 0.5, no genre preferences dict.
-        # Tests what happens when the user has zero strong opinions.
-        "genre": "pop",
-        "mood": "chill",
-        "energy": 0.50,
-        "likes_acoustic": False,
-        "target_acousticness": 0.50,
-        "target_danceability": 0.50,
-        "prefers_instrumental": None,
+        "min_popularity": 60,
+        "preferred_decade": "2020s",
+        "preferred_mood_tags": ["warm", "euphoric"],
+        "target_liveness": 0.20,
+        "preferred_vocal": "male",
     },
 }
 
@@ -114,85 +100,125 @@ USER_PROFILES = {**STANDARD_PROFILES, **EDGE_CASE_PROFILES}
 
 
 # ---------------------------------------------------------------------------
-# Display helpers
+# Challenge 4: Visual summary table (ASCII, no external dependencies)
 # ---------------------------------------------------------------------------
 
-def print_profile(name: str, prefs: dict) -> None:
-    """Print a boxed profile header."""
-    w = 60
-    border = "+" + "-" * (w - 2) + "+"
-    print(border)
-    print(f"|  {name:^{w - 4}}  |")
-    print(border)
+def format_table(headers: list, rows: list, col_widths: list) -> str:
+    """Build an ASCII table string from headers and rows."""
+    lines = []
+    sep = "+" + "+".join("-" * (w + 2) for w in col_widths) + "+"
+    lines.append(sep)
 
-    genre = prefs["genre"]
-    mood = prefs["mood"]
-    energy = prefs["energy"]
-    print(f"|  Genre: {genre:<12} Mood: {mood:<12} Energy: {energy:<6}  |")
+    header_line = "|"
+    for h, w in zip(headers, col_widths):
+        header_line += f" {h:<{w}} |"
+    lines.append(header_line)
+    lines.append(sep)
 
-    if prefs.get("genre_preferences"):
-        affinities = ", ".join(f"{g} ({v})" for g, v in
-                               prefs["genre_preferences"].items())
-        line = f"  Affinities: {affinities}"
-        print(f"|{line:<{w - 2}}|")
+    for row in rows:
+        line = "|"
+        for val, w in zip(row, col_widths):
+            line += f" {str(val):<{w}} |"
+        lines.append(line)
 
-    extras = []
-    if prefs.get("target_acousticness") is not None:
-        extras.append(f"acoustic={prefs['target_acousticness']}")
-    if prefs.get("target_danceability") is not None:
-        extras.append(f"dance={prefs['target_danceability']}")
-    if prefs.get("prefers_instrumental") is not None:
-        extras.append(f"instrumental={prefs['prefers_instrumental']}")
-    if extras:
-        line = f"  {', '.join(extras)}"
-        print(f"|{line:<{w - 2}}|")
-
-    print(border)
+    lines.append(sep)
+    return "\n".join(lines)
 
 
-def print_recommendation(rank: int, song: dict, score: float,
-                         reasons: list) -> None:
-    """Print a single ranked recommendation with score bar and reasons."""
-    title = song["title"]
-    artist = song["artist"]
-    genre = song["genre"]
-    mood = song["mood"]
+def reasons_summary(reasons: list, max_reasons: int = 3) -> str:
+    """Compact the top N reasons into a short string."""
+    top = reasons[:max_reasons]
+    return "; ".join(top)
 
-    print(f"  #{rank}  {title} -- {artist}")
-    print(f"       {genre} / {mood}")
-    print(f"       {score:.2f} / {MAX_SCORE:.1f} pts")
-    print(f"       Reasons:")
-    for reason in reasons:
-        print(f"         + {reason}")
-    print()
+
+def print_profile_header(name: str, prefs: dict, mode: str) -> None:
+    """Print a compact profile header."""
+    print(f"\n  Profile: {name}  [mode: {mode}]")
+    parts = [f"genre={prefs['genre']}", f"mood={prefs['mood']}",
+             f"energy={prefs['energy']}"]
+    if prefs.get("preferred_decade"):
+        parts.append(f"decade={prefs['preferred_decade']}")
+    if prefs.get("min_popularity"):
+        parts.append(f"min_pop={prefs['min_popularity']}")
+    if prefs.get("preferred_mood_tags"):
+        parts.append(f"tags={','.join(prefs['preferred_mood_tags'][:3])}")
+    print(f"  {', '.join(parts)}")
+
+
+def print_results_table(recommendations: list, max_score: float,
+                        diversity: bool = False) -> None:
+    """Print recommendations as a formatted ASCII table."""
+    headers = ["#", "Title", "Artist", "Genre", "Score", "Top Reasons"]
+    widths = [2, 22, 16, 11, 10, 48]
+    rows = []
+    for rank, (song, score, reasons) in enumerate(recommendations, 1):
+        pct = f"{score:.2f}/{max_score:.1f}"
+        short_reasons = reasons_summary(reasons)
+        rows.append([
+            rank,
+            song["title"][:22],
+            song["artist"][:16],
+            song["genre"][:11],
+            pct,
+            short_reasons[:48],
+        ])
+
+    label = " (diversity ON)" if diversity else ""
+    print(f"\n  Top {len(recommendations)} Recommendations{label}:\n")
+    for line in format_table(headers, rows, widths).split("\n"):
+        print(f"  {line}")
 
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
-def run_profiles(label: str, profiles: dict, songs: list) -> None:
-    """Run a group of profiles and print results."""
-    print()
-    print(f"{'=' * 60}")
-    print(f"  {label}")
-    print(f"{'=' * 60}")
-    for profile_name, user_prefs in profiles.items():
-        print()
-        print_profile(profile_name, user_prefs)
-        print()
+def run_profile(name: str, prefs: dict, songs: list, mode: str = "balanced",
+                diversity: bool = False) -> None:
+    """Run a single profile and print the table."""
+    prefs_with_mode = {**prefs, "mode": mode}
+    max_score = sum(SCORING_MODES[mode].values())
 
-        recommendations = recommend_songs(user_prefs, songs, k=5)
-
-        for rank, (song, score, reasons) in enumerate(recommendations, 1):
-            print_recommendation(rank, song, score, reasons)
+    print_profile_header(name, prefs, mode)
+    recommendations = recommend_songs(prefs_with_mode, songs, k=5,
+                                      diversity=diversity)
+    print_results_table(recommendations, max_score, diversity)
 
 
 def main() -> None:
     songs = load_songs(os.path.join(_PROJECT_ROOT, "data", "songs.csv"))
 
-    run_profiles("STANDARD PROFILES", STANDARD_PROFILES, songs)
-    run_profiles("ADVERSARIAL / EDGE-CASE PROFILES", EDGE_CASE_PROFILES, songs)
+    # --- Standard profiles in balanced mode ---
+    print("=" * 70)
+    print("  STANDARD PROFILES (balanced mode)")
+    print("=" * 70)
+    for name, prefs in STANDARD_PROFILES.items():
+        run_profile(name, prefs, songs, mode="balanced")
+
+    # --- Edge cases in balanced mode ---
+    print("\n" + "=" * 70)
+    print("  EDGE-CASE PROFILES (balanced mode)")
+    print("=" * 70)
+    for name, prefs in EDGE_CASE_PROFILES.items():
+        run_profile(name, prefs, songs, mode="balanced")
+
+    # --- Challenge 2: Scoring mode comparison ---
+    print("\n" + "=" * 70)
+    print("  SCORING MODE COMPARISON (High-Energy Pop across all modes)")
+    print("=" * 70)
+    pop_prefs = STANDARD_PROFILES["High-Energy Pop"]
+    for mode in SCORING_MODES:
+        run_profile("High-Energy Pop", pop_prefs, songs, mode=mode)
+
+    # --- Challenge 3: Diversity penalty demo ---
+    print("\n" + "=" * 70)
+    print("  DIVERSITY PENALTY DEMO (Chill Lofi: OFF vs ON)")
+    print("=" * 70)
+    lofi_prefs = STANDARD_PROFILES["Chill Lofi"]
+    run_profile("Chill Lofi", lofi_prefs, songs, mode="balanced",
+                diversity=False)
+    run_profile("Chill Lofi", lofi_prefs, songs, mode="balanced",
+                diversity=True)
 
 
 if __name__ == "__main__":
